@@ -1,8 +1,9 @@
-const express = require ('express')
-const router = express.Router ()
-router.get ("/bookList", async (req,res)=>{
-    let message = "Hi Team TARDIS"
-    res.send (message)
-})
+import express from "express";
+const router = express.Router();
+router.get("/bookList", async (req, res) => {
+  let message =
+    "Hi Team TARDIS. If you see this message, the back end is connected to the front end.";
+  res.json(message);
+});
 
-module.exports = router
+export default router;
