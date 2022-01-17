@@ -1,6 +1,6 @@
-const express = require("express")
-const cors = require("cors")
-const router = require( "./routes/bookRoutes.js")
+const express = require("express");
+const cors = require("cors");
+const router = require("./routes/bookRoutes.js");
 const app = express();
 const port = 5000;
 
