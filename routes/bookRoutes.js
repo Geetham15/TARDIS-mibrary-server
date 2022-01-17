@@ -1,20 +1,12 @@
-const express = require("express")
+const express = require("express");
 
-const bookShelvesModel = require('../models/bookShelves')
+const { listBook, addBook } = require("../controllers/controller");
 
 const router = express.Router();
 
-// router.get("/bookList", async (req, res) => {
-//   let message =
-//     "Hi Team TARDIS. If you see this message, the back end is connected to the front end.";
-//   res.json(message);
-// });
+router.get("/bookList", listBook);
 
-router.get("/bookList", async (req, res) => {
-  let bookList = await bookShelvesModel.listBook()
-  console.log(bookList)
-  res.send(bookList)
-});
+router.post("/addBook", addBook);
 
 //export default router;
-module.exports = router
+module.exports = router;
