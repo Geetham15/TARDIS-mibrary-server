@@ -11,6 +11,7 @@ const BookShelves = mongoose.model("BookShelves", {
   condition: String,
   comments: String,
   subjects: Array,
+  location: Object,
 });
 
 export default BookShelves;
