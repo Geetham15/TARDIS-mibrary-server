@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 
-const { listBook, addBook } = require("../controllers/controller");
+import { listBook, addBook } from "../controllers/controller.js";
 
 const router = express.Router();
 
@@ -9,4 +9,4 @@ router.get("/bookList", listBook);
 router.post("/addBook", addBook);
 
 //export default router;
-module.exports = router;
+export default router;

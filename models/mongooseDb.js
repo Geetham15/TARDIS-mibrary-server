@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const dbUrl =
   "mongodb+srv://admin:TNUrD18jwWc54q02@mibrary.e7agz.mongodb.net/mibrary";
@@ -6,4 +6,4 @@ const dbUrl =
 
 mongoose.connect(dbUrl);
 
-module.exports = mongoose;
+export default mongoose;
