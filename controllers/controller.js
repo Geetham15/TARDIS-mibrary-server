@@ -10,7 +10,6 @@ async function addBook(req, res) {
 
 async function listBook(req, res) {
   let bookList = await BookShelves.find({});
-  console.log(bookList);
   res.json(bookList);
 }
 
