@@ -1,4 +1,4 @@
-const mongoose = require("./mongooseDb");
+import mongoose from "./mongooseDb.js";
 
 const BookShelves = mongoose.model("BookShelves", {
   title: { type: String, required: true },
@@ -13,6 +13,4 @@ const BookShelves = mongoose.model("BookShelves", {
   subjects: Array,
 });
 
-module.exports = {
-  BookShelves,
-};
+export default BookShelves;

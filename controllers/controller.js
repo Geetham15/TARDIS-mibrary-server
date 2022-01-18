@@ -1,4 +1,4 @@
-const { BookShelves } = require("../models/bookShelves");
+import BookShelves from "../models/bookShelves.js";
 
 async function addBook(req, res) {
   console.log("Adding a Book");
@@ -13,7 +13,4 @@ async function listBook(req, res) {
   res.json(bookList);
 }
 
-module.exports = {
-  addBook,
-  listBook,
-};
+export { addBook, listBook };
