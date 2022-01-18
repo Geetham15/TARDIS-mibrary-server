@@ -13,4 +13,12 @@ async function listBook(req, res) {
   res.json(bookList);
 }
 
-export { addBook, listBook };
+async function search(req, res) {
+  let result = await BookShelves.findOne({
+    title: { $regex: new RegExp("^" + req.params.title + "$", "i") },
+  });
+  console.log(result);
+  res.json(result);
+}
+
+export { addBook, listBook, search };
