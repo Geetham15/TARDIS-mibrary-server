@@ -20,9 +20,11 @@
   },
   "homepage": "https://github.com/KoltanHuget/project-3-server#readme",
   "dependencies": {
+    "async": "^3.2.3",
     "cors": "^2.8.5",
     "express": "^4.17.2",
     "mongoose": "^6.1.7",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "tedious": "^14.1.0"
   }
 }
