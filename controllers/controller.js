@@ -12,22 +12,34 @@ function listBook(req, res) {
         console.log(err.message);
         res.json(bookList);
       } else {
-        console.log(rowCount + " row(s) returned", rows);
+        console.log(rowCount + " row(s) returned");
         bookList = rows;
+        console.log(bookList);
+        res.json(bookList);
       }
     }
   );
   connection.execSql(request);
-  res.json(bookList);
 }
 
-// async function search(req, res) {
-//   let result = await BookShelves.findOne({
-//     title: { $regex: new RegExp("^" + req.params.title + "$", "i") },
-//   });
-//   console.log(result);
-//   res.json(result);
-// }
+function search(req, res) {
+  let bookList;
+  const request = new Request(
+    `SELECT allBooks.*, Users.userName, Users.latitude, Users.longitude FROM allBooks INNER JOIN Users ON allBooks.user_id = Users.user_id WHERE title LIKE '%${req.params.title}%'`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+        res.json(null);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        bookList = rows;
+        console.log(bookList);
+        res.json(bookList);
+      }
+    }
+  );
+  connection.execSql(request);
+}
 
 function deleteBookById(req, res) {
   const { id } = req.body;
@@ -69,60 +81,83 @@ function addBook(req, res) {
   res.json({ title: req.body.title });
 }
 
-function dropTable(callback) {
-  console.log("Dropping table if exists...");
-
-  // Read all rows from table
+function createUser(req, res) {
+  console.log(req.body);
+  const { userName, email, password, latitude, longitude } = req.body;
   const request = new Request(
-    `DROP TABLE IF EXISTS allBooks`,
-    (err, rowCount) => {
+    `INSERT INTO Users (userName, email, password, latitude, longitude) VALUES (@userName, @email, @password, @latitude, @longitude)`,
+    (err, rowCount, rows) => {
       if (err) {
-        console.error(err.message);
+        console.log(err.message);
       } else {
-        console.log("table dropped");
-        callback(null);
+        console.log(rowCount + " added");
       }
     }
   );
-  request.on("requestCompleted", (rowCount, more) => {
-    console.log("disconnecting");
-    connection.close();
-  });
+  request.addParameter("userName", TYPES.Text, userName);
+  request.addParameter("email", TYPES.Text, email);
+  request.addParameter("password", TYPES.Text, password);
+  request.addParameter("latitude", TYPES.Float, latitude);
+  request.addParameter("longitude", TYPES.Float, longitude);
+
   connection.execSql(request);
+  res.json({ userName: req.body.userName });
 }
 
-function createTable() {
-  console.log("Creating new table...");
+// function dropTable(callback) {
+//   console.log("Dropping table if exists...");
 
-  // Read all rows from table
-  const request = new Request(
-    `CREATE TABLE allBooks (id INTEGER PRIMARY KEY IDENTITY(1,1), title TEXT NOT NULL, authors TEXT NOT NULL, isbn_13 TEXT, isbn_10 TEXT, physical_format TEXT, condition TEXT, comments TEXT, user_id INTEGER NOT NULL)`,
-    (err, rowCount) => {
-      if (err) {
-        console.error(err.message);
-      } else {
-        console.log("table created");
-      }
-    }
-  );
-  request.on("requestCompleted", (rowCount, more) => {
-    connection.close();
-  });
-  connection.execSql(request);
-}
+//   // Read all rows from table
+//   const request = new Request(
+//     `DROP TABLE IF EXISTS allBooks`,
+//     (err, rowCount) => {
+//       if (err) {
+//         console.error(err.message);
+//       } else {
+//         console.log("table dropped");
+//         callback(null);
+//       }
+//     }
+//   );
+//   request.on("requestCompleted", (rowCount, more) => {
+//     console.log("disconnecting");
+//     connection.close();
+//   });
+//   connection.execSql(request);
+// }
 
-const dropOldAndCreateNewTable = () => {
-  connection.on("connect", (err) => {
-    if (err) {
-      console.error(err.message);
-    } else {
-      console.log("Connected to SQL database");
-      async.waterfall([dropTable, createTable], () => {
-        console.log("complete");
-      });
-    }
-  });
-  connection.connect();
-};
+// function createTable() {
+//   console.log("Creating new table...");
 
-export { addBook, listBook };
+//   // Read all rows from table
+//   const request = new Request(
+//     `CREATE TABLE allBooks (id INTEGER PRIMARY KEY IDENTITY(1,1), title TEXT NOT NULL, authors TEXT NOT NULL, isbn_13 TEXT, isbn_10 TEXT, physical_format TEXT, condition TEXT, comments TEXT, user_id INTEGER NOT NULL)`,
+//     (err, rowCount) => {
+//       if (err) {
+//         console.error(err.message);
+//       } else {
+//         console.log("table created");
+//       }
+//     }
+//   );
+//   request.on("requestCompleted", (rowCount, more) => {
+//     connection.close();
+//   });
+//   connection.execSql(request);
+// }
+
+// const dropOldAndCreateNewTable = () => {
+//   connection.on("connect", (err) => {
+//     if (err) {
+//       console.error(err.message);
+//     } else {
+//       console.log("Connected to SQL database");
+//       async.waterfall([dropTable, createTable], () => {
+//         console.log("complete");
+//       });
+//     }
+//   });
+//   connection.connect();
+// };
+
+export { addBook, listBook, search };

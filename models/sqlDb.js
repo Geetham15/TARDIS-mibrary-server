@@ -4,14 +4,14 @@ import { Connection, TYPES } from "tedious";
 const config = {
   authentication: {
     options: {
-      userName: "azureuser", // update me
-      password: "2cPTuC!kd9WmRMR", // update me
+      userName: "azureuser",
+      password: "2cPTuC!kd9WmRMR",
     },
     type: "default",
   },
-  server: "mibraryserver.database.windows.net", // update me
+  server: "mibraryserver.database.windows.net",
   options: {
-    database: "mibraryserver", //update me
+    database: "mibraryserver",
     encrypt: true,
     rowCollectionOnRequestCompletion: true,
   },
