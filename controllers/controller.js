@@ -89,9 +89,14 @@ function createUser(req, res) {
     `INSERT INTO Users (userName, email, password, latitude, longitude) VALUES (@userName, @email, @password, @latitude, @longitude)`,
     (err, rowCount, rows) => {
       if (err) {
-        console.log(err.message);
+        console.log("username or email already exists");
+        res.json({
+          message: "Username or email already exists. Please try again.",
+          success: false,
+        });
       } else {
         console.log(rowCount + " added");
+        res.json({ message: "Success! Please log in.", success: true });
       }
     }
   );
@@ -102,7 +107,6 @@ function createUser(req, res) {
   request.addParameter("longitude", TYPES.Float, longitude);
 
   connection.execSql(request);
-  res.json({ userName: req.body.username });
 }
 
 // function dropTable(callback) {
