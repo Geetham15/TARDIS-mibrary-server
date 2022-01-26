@@ -83,7 +83,8 @@ function addBook(req, res) {
 
 function createUser(req, res) {
   console.log(req.body);
-  const { userName, email, password, latitude, longitude } = req.body;
+  const { email, password, latitude, longitude } = req.body;
+  const userName = req.body.username;
   const request = new Request(
     `INSERT INTO Users (userName, email, password, latitude, longitude) VALUES (@userName, @email, @password, @latitude, @longitude)`,
     (err, rowCount, rows) => {
@@ -101,7 +102,7 @@ function createUser(req, res) {
   request.addParameter("longitude", TYPES.Float, longitude);
 
   connection.execSql(request);
-  res.json({ userName: req.body.userName });
+  res.json({ userName: req.body.username });
 }
 
 // function dropTable(callback) {
@@ -160,4 +161,4 @@ function createUser(req, res) {
 //   connection.connect();
 // };
 
-export { addBook, listBook, search };
+export { addBook, listBook, search, createUser };
