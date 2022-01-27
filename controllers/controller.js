@@ -42,6 +42,30 @@ function search(req, res) {
   connection.execSql(request);
 }
 
+function findUserByEmail(email) {
+  let response = {};
+  return new Promise((resolve, reject) => {
+    const request = new Request(
+      `SELECT * FROM Users WHERE email='${email}'`,
+      (err, rowCount, row) => {
+        if (err) {
+          console.log(err.message, "hello");
+          reject;
+        } else {
+          console.log(rowCount + " row(s) returned");
+
+          for (let col of row[0]) {
+            let columnName = col.metadata.colName;
+            response[columnName] = col.value;
+          }
+          resolve(response);
+        }
+      }
+    );
+    connection.execSql(request);
+  });
+}
+
 function deleteBookById(req, res) {
   const { id } = req.body;
   const request = new Request(`DELETE FROM allBooks WHERE id=${id}`);
@@ -118,4 +142,24 @@ function createUser(req, res) {
   });
 }
 
-export { addBook, listBook, search, createUser };
+async function logIn(req, res) {
+  const { email, password } = req.body;
+  const user = await findUserByEmail(email);
+  console.log(user);
+  res.json();
+  const match = await bcrypt.compare(password, user.password);
+  if (match) {
+    console.log("login successful");
+    res.json({
+      username: user.username,
+      email: user.email,
+      latitude: user.latitude,
+      longitude: user.longitude,
+    });
+  } else {
+    console.log("login failed");
+    res.json(null);
+  }
+}
+
+export { addBook, listBook, search, createUser, logIn };
