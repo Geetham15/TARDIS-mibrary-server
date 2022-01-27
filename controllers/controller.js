@@ -2,6 +2,7 @@ import connection from "../models/sqlDb.js";
 import { Request, TYPES } from "tedious";
 import { query } from "express";
 import async from "async";
+import bcrypt from "bcrypt";
 
 function listBook(req, res) {
   let bookList;
@@ -85,84 +86,36 @@ function createUser(req, res) {
   console.log(req.body);
   const { email, password, latitude, longitude } = req.body;
   const userName = req.body.username;
-  const request = new Request(
-    `INSERT INTO Users (userName, email, password, latitude, longitude) VALUES (@userName, @email, @password, @latitude, @longitude)`,
-    (err, rowCount, rows) => {
-      if (err) {
-        console.log("username or email already exists");
-        res.json({
-          message: "Username or email already exists. Please try again.",
-          success: false,
-        });
-      } else {
-        console.log(rowCount + " added");
-        res.json({ message: "Success! Please log in.", success: true });
-      }
+  const saltRounds = 10;
+  bcrypt.hash(password, saltRounds, function (err, hashedPassword) {
+    if (err) {
+      console.log(err);
+      return;
     }
-  );
-  request.addParameter("userName", TYPES.Text, userName);
-  request.addParameter("email", TYPES.Text, email);
-  request.addParameter("password", TYPES.Text, password);
-  request.addParameter("latitude", TYPES.Float, latitude);
-  request.addParameter("longitude", TYPES.Float, longitude);
+    console.log(hashedPassword);
+    const request = new Request(
+      `INSERT INTO Users (userName, email, password, latitude, longitude) VALUES (@userName, @email, @password, @latitude, @longitude)`,
+      (err, rowCount, rows) => {
+        if (err) {
+          console.log("username or email already exists");
+          res.json({
+            message: "Username or email already exists. Please try again.",
+            success: false,
+          });
+        } else {
+          console.log(rowCount + " added");
+          res.json({ message: "Success! Please log in.", success: true });
+        }
+      }
+    );
+    request.addParameter("userName", TYPES.Text, userName);
+    request.addParameter("email", TYPES.Text, email);
+    request.addParameter("password", TYPES.Text, hashedPassword);
+    request.addParameter("latitude", TYPES.Float, latitude);
+    request.addParameter("longitude", TYPES.Float, longitude);
 
-  connection.execSql(request);
+    connection.execSql(request);
+  });
 }
-
-// function dropTable(callback) {
-//   console.log("Dropping table if exists...");
-
-//   // Read all rows from table
-//   const request = new Request(
-//     `DROP TABLE IF EXISTS allBooks`,
-//     (err, rowCount) => {
-//       if (err) {
-//         console.error(err.message);
-//       } else {
-//         console.log("table dropped");
-//         callback(null);
-//       }
-//     }
-//   );
-//   request.on("requestCompleted", (rowCount, more) => {
-//     console.log("disconnecting");
-//     connection.close();
-//   });
-//   connection.execSql(request);
-// }
-
-// function createTable() {
-//   console.log("Creating new table...");
-
-//   // Read all rows from table
-//   const request = new Request(
-//     `CREATE TABLE allBooks (id INTEGER PRIMARY KEY IDENTITY(1,1), title TEXT NOT NULL, authors TEXT NOT NULL, isbn_13 TEXT, isbn_10 TEXT, physical_format TEXT, condition TEXT, comments TEXT, user_id INTEGER NOT NULL)`,
-//     (err, rowCount) => {
-//       if (err) {
-//         console.error(err.message);
-//       } else {
-//         console.log("table created");
-//       }
-//     }
-//   );
-//   request.on("requestCompleted", (rowCount, more) => {
-//     connection.close();
-//   });
-//   connection.execSql(request);
-// }
-
-// const dropOldAndCreateNewTable = () => {
-//   connection.on("connect", (err) => {
-//     if (err) {
-//       console.error(err.message);
-//     } else {
-//       console.log("Connected to SQL database");
-//       async.waterfall([dropTable, createTable], () => {
-//         console.log("complete");
-//       });
-//     }
-//   });
-//   connection.connect();
-// };
 
 export { addBook, listBook, search, createUser };
