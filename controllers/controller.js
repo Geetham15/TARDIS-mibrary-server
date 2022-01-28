@@ -145,8 +145,6 @@ function createUser(req, res) {
 async function logIn(req, res) {
   const { email, password } = req.body;
   const user = await findUserByEmail(email);
-  console.log(user);
-  res.json();
   const match = await bcrypt.compare(password, user.password);
   if (match) {
     console.log("login successful");
