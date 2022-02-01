@@ -100,7 +100,7 @@ function addBook(req, res) {
   request.addParameter("physical_format", TYPES.Text, physical_format);
   request.addParameter("condition", TYPES.Text, condition);
   request.addParameter("comments", TYPES.Text, comments);
-  request.addParameter("user_id", TYPES.Int, 2);
+  request.addParameter("user_id", TYPES.Int, user_id);
 
   connection.execSql(request);
   res.json({ title: req.body.title });
@@ -149,10 +149,12 @@ async function logIn(req, res) {
   if (match) {
     console.log("login successful");
     res.json({
+      userId: user.id,
       username: user.username,
       email: user.email,
       latitude: user.latitude,
       longitude: user.longitude,
+      message: 'success'
     });
   } else {
     console.log("login failed");
