@@ -23,6 +23,41 @@ function listBook(req, res) {
   connection.execSql(request);
 }
 
+function listBooksByUserId(req, res) {
+  let bookList;
+  const request = new Request(
+    `SELECT * FROM allBooks WHERE user_id=${req.params.id}`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+        res.json(bookList);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        bookList = rows;
+        console.log(bookList);
+        res.json(bookList);
+      }
+    }
+  );
+  connection.execSql(request);
+}
+
+function deleteBookById(req, res) {
+  const request = new Request(
+    `DELETE FROM allBooks WHERE id=${req.body.id}`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+        res.json(null);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        res.json({ message: "success" });
+      }
+    }
+  );
+  connection.execSql(request);
+}
+
 function search(req, res) {
   let bookList;
   const request = new Request(
@@ -64,11 +99,6 @@ function findUserByEmail(email) {
     );
     connection.execSql(request);
   });
-}
-
-function deleteBookById(req, res) {
-  const { id } = req.body;
-  const request = new Request(`DELETE FROM allBooks WHERE id=${id}`);
 }
 
 function addBook(req, res) {
@@ -154,7 +184,7 @@ async function logIn(req, res) {
       email: user.email,
       latitude: user.latitude,
       longitude: user.longitude,
-      message: 'success'
+      message: "success",
     });
   } else {
     console.log("login failed");
@@ -162,4 +192,12 @@ async function logIn(req, res) {
   }
 }
 
-export { addBook, listBook, search, createUser, logIn };
+export {
+  addBook,
+  listBook,
+  search,
+  createUser,
+  logIn,
+  listBooksByUserId,
+  deleteBookById,
+};
