@@ -66,16 +66,23 @@ function deleteBookById(req, res) {
 }
 
 function search(req, res) {
-  let bookList;
   const request = new Request(
-    `SELECT allBooks.*, Users.userName, Users.latitude, Users.longitude FROM allBooks INNER JOIN Users ON allBooks.user_id = Users.user_id WHERE title LIKE '%${req.params.title}%'`,
+    `SELECT allBooks.*, Users.userName, Users.latitude, Users.longitude FROM allBooks INNER JOIN Users ON allBooks.user_id = Users.id WHERE title LIKE '%${req.params.title}%'`,
     (err, rowCount, rows) => {
       if (err) {
         console.log(err.message);
         res.json(null);
       } else {
         console.log(rowCount + " row(s) returned");
-        bookList = rows;
+        let bookList = [];
+        for (let row of rows) {
+          let rowObject = {};
+          for (let col of row) {
+            let columnName = col.metadata.colName;
+            rowObject[columnName] = col.value;
+          }
+          bookList.push(rowObject);
+        }
         console.log(bookList);
         res.json(bookList);
       }
