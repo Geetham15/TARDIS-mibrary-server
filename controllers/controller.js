@@ -33,8 +33,15 @@ function listBooksByUserId(req, res) {
         res.json(bookList);
       } else {
         console.log(rowCount + " row(s) returned");
-        bookList = rows;
-        console.log(bookList);
+        let bookList = [];
+        for (let row of rows) {
+          let rowObject = {};
+          for (let col of row) {
+            let columnName = col.metadata.colName;
+            rowObject[columnName] = col.value;
+          }
+          bookList.push(rowObject);
+        }
         res.json(bookList);
       }
     }
@@ -114,12 +121,14 @@ function addBook(req, res) {
     user_id,
   } = req.body;
   const request = new Request(
-    `INSERT INTO allBooks (title, authors, isbn_13, isbn_10, physical_format, condition, comments, user_id) VALUES (@title, @authors, @isbn_13, @isbn_10, @physical_format, @condition, @comments, @user_id)`,
-    (err, rowCount, rows) => {
+    `INSERT INTO allBooks (title, authors, isbn_13, isbn_10, physical_format, condition, comments, user_id) OUTPUT Inserted.ID VALUES (@title, @authors, @isbn_13, @isbn_10, @physical_format, @condition, @comments, @user_id)`,
+    (err, rowCount, id) => {
       if (err) {
         console.log(err.message);
       } else {
         console.log(rowCount + " added");
+        console.log(id[0][0].value);
+        res.json({ title: req.body.title, id: id[0][0].value });
       }
     }
   );
@@ -133,7 +142,6 @@ function addBook(req, res) {
   request.addParameter("user_id", TYPES.Int, user_id);
 
   connection.execSql(request);
-  res.json({ title: req.body.title });
 }
 
 function createUser(req, res) {
