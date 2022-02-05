@@ -1,8 +1,13 @@
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import router from "./routes/bookRoutes.js";
+import cookieParser from "cookie-parser";
+
+dotenv.config();
+console.log(process.env.AZURE_USERNAME);
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5050;
 
 app.use(
   cors({
@@ -10,7 +15,9 @@ app.use(
   })
 );
 
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api", router);
 
