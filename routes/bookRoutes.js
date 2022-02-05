@@ -1,5 +1,5 @@
 import express from "express";
-
+import auth from "../middleware/auth.js";
 import {
   addBook,
   listBook,
@@ -8,23 +8,28 @@ import {
   logIn,
   listBooksByUserId,
   deleteBookById,
+  logOut,
+  isLoggedIn,
 } from "../controllers/controller.js";
 
 const router = express.Router();
 
-router.get("/bookList", listBook);
+router.get("/bookList", auth, listBook);
 
-router.get("/userBooks/:id", listBooksByUserId);
+router.get("/userBooks/:id", auth, listBooksByUserId);
 
-router.get("/search/:title", search);
+router.get("/search/:title", auth, search);
 
-router.post("/addBook", addBook);
+router.post("/addBook", auth, addBook);
 
-router.post("/deleteBook", deleteBookById);
+router.post("/deleteBook", auth, deleteBookById);
 
 router.post("/createUser", createUser);
 
 router.post("/logIn", logIn);
 
+router.get("/logOut", logOut);
+
+router.get("/loggedIn", isLoggedIn);
 //export default router;
 export default router;
