@@ -220,7 +220,8 @@ async function logIn(req, res) {
         longitude: user.longitude,
         email: user.email,
       },
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { expiresIn: 86400 }
     );
 
     res.cookie("token", token, {
