@@ -1,17 +1,19 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { Connection, TYPES } from "tedious";
 
 // Create connection to database
 const config = {
   authentication: {
     options: {
-      userName: "azureuser",
-      password: "2cPTuC!kd9WmRMR",
+      userName: process.env.AZURE_USERNAME,
+      password: process.env.AZURE_PASSWORD,
     },
     type: "default",
   },
-  server: "mibraryserver.database.windows.net",
+  server: process.env.SQL_SERVER,
   options: {
-    database: "mibraryserver",
+    database: process.env.SQL_DATABASE,
     encrypt: true,
     rowCollectionOnRequestCompletion: true,
   },

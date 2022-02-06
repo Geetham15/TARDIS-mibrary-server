@@ -1,8 +1,7 @@
 import connection from "../models/sqlDb.js";
 import { Request, TYPES } from "tedious";
-import { query } from "express";
-import async from "async";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 function listBook(req, res) {
   let bookList;
@@ -92,7 +91,7 @@ function search(req, res) {
 }
 
 function findUserByEmail(email) {
-  let response = {};
+  let response;
   return new Promise((resolve, reject) => {
     const request = new Request(
       `SELECT * FROM Users WHERE email='${email}'`,
@@ -102,11 +101,16 @@ function findUserByEmail(email) {
           reject;
         } else {
           console.log(rowCount + " row(s) returned");
-
-          for (let col of row[0]) {
-            let columnName = col.metadata.colName;
-            response[columnName] = col.value;
+          if (!rowCount) {
+            reject;
+          } else {
+            response = {};
+            for (let col of row[0]) {
+              let columnName = col.metadata.colName;
+              response[columnName] = col.value;
+            }
           }
+
           resolve(response);
         }
       }
@@ -152,58 +156,110 @@ function addBook(req, res) {
 }
 
 function createUser(req, res) {
-  console.log(req.body);
-  const { email, password, latitude, longitude } = req.body;
-  const userName = req.body.username;
-  const saltRounds = 10;
-  bcrypt.hash(password, saltRounds, function (err, hashedPassword) {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log(hashedPassword);
-    const request = new Request(
-      `INSERT INTO Users (userName, email, password, latitude, longitude) VALUES (@userName, @email, @password, @latitude, @longitude)`,
-      (err, rowCount, rows) => {
-        if (err) {
-          console.log("username or email already exists");
-          res.json({
-            message: "Username or email already exists. Please try again.",
-            success: false,
-          });
-        } else {
-          console.log(rowCount + " added");
-          res.json({ message: "Success! Please log in.", success: true });
-        }
+  try {
+    console.log(req.body);
+    const { email, password, latitude, longitude } = req.body;
+    const userName = req.body.username;
+    const saltRounds = 10;
+    bcrypt.hash(password, saltRounds, function (err, hashedPassword) {
+      if (err) {
+        console.log(err);
+        return;
       }
-    );
-    request.addParameter("userName", TYPES.Text, userName);
-    request.addParameter("email", TYPES.Text, email);
-    request.addParameter("password", TYPES.Text, hashedPassword);
-    request.addParameter("latitude", TYPES.Float, latitude);
-    request.addParameter("longitude", TYPES.Float, longitude);
+      const request = new Request(
+        `INSERT INTO Users (userName, email, password, latitude, longitude) VALUES (@userName, @email, @password, @latitude, @longitude)`,
+        (err, rowCount, rows) => {
+          if (err) {
+            console.log("username or email already exists");
+            res.json({
+              message: "Username or email already exists. Please try again.",
+              success: false,
+            });
+          } else {
+            console.log(rowCount + " added");
+            // return jsonwebtoken
+            const token = jwt.sign(
+              { user: newUser._id },
+              process.env.JWT_SECRET
+            );
+            // send the token in a HTTP-only cookie
+            res.cookie("token", token, { httpOnly: true });
+            res.json({ message: "Success! Please log in.", success: true });
+          }
+        }
+      );
+      request.addParameter("userName", TYPES.Text, userName);
+      request.addParameter("email", TYPES.Text, email);
+      request.addParameter("password", TYPES.Text, hashedPassword);
+      request.addParameter("latitude", TYPES.Float, latitude);
+      request.addParameter("longitude", TYPES.Float, longitude);
 
-    connection.execSql(request);
-  });
+      connection.execSql(request);
+    });
+  } catch {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
 }
 
 async function logIn(req, res) {
   const { email, password } = req.body;
   const user = await findUserByEmail(email);
+  if (!user) {
+    return res.json({ message: "failed" });
+  }
   const match = await bcrypt.compare(password, user.password);
   if (match) {
     console.log("login successful");
-    res.json({
-      userId: user.id,
-      username: user.username,
-      email: user.email,
-      latitude: user.latitude,
-      longitude: user.longitude,
-      message: "success",
+    // return jsonwebtoken
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        username: user.username,
+        latitude: user.latitude,
+        longitude: user.longitude,
+        email: user.email,
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: 86400 }
+    );
+
+    res.cookie("token", token, {
+      httpOnly: true,
     });
+    res.json({ message: "success" });
   } else {
     console.log("login failed");
     res.json(null);
+  }
+}
+
+async function logOut(req, res) {
+  try {
+    res
+      .cookie("token", "", {
+        httpOnly: true,
+        expires: new Date(Date.now()),
+      })
+      .json({ message: "User logged out" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+function isLoggedIn(req, res) {
+  try {
+    const token = req.cookies.token;
+    if (!token) {
+      return res.send(false);
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+      if (err) return res.sendStatus(403);
+      return res.json(user);
+    });
+  } catch (error) {
+    res.send(false);
   }
 }
 
@@ -215,4 +271,6 @@ export {
   logIn,
   listBooksByUserId,
   deleteBookById,
+  logOut,
+  isLoggedIn,
 };
