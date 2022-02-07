@@ -178,12 +178,12 @@ function createUser(req, res) {
           } else {
             console.log(rowCount + " added");
             // return jsonwebtoken
-            const token = jwt.sign(
-              { user: newUser._id },
-              process.env.JWT_SECRET
-            );
-            // send the token in a HTTP-only cookie
-            res.cookie("token", token, { httpOnly: true });
+            // const token = jwt.sign(
+            //   { user: newUser._id },
+            //   process.env.JWT_SECRET
+            // );
+            // // send the token in a HTTP-only cookie
+            // res.cookie("token", token, { httpOnly: true });
             res.json({ message: "Success! Please log in.", success: true });
           }
         }
