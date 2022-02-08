@@ -11,6 +11,7 @@ import {
   logOut,
   isLoggedIn,
 } from "../controllers/controller.js";
+import { sendChat } from "../controllers/chatController.js";
 
 const router = express.Router();
 
@@ -28,8 +29,13 @@ router.post("/createUser", createUser);
 
 router.post("/logIn", logIn);
 
-router.get("/logOut", logOut);
+router.get("/logOut", auth, logOut);
 
 router.get("/loggedIn", isLoggedIn);
+
+// chat routes
+
+router.post("/sendChat", auth, sendChat);
+
 //export default router;
 export default router;
