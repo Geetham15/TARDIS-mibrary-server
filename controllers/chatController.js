@@ -10,11 +10,11 @@ const sendChat = (req, res) => {
       if (err) {
         console.log(err.message);
         console.log({ message: "failed" });
-        return;
+        res.json({ message: "failed" });
       } else {
         console.log(rowCount + " added");
         console.log({ message: "success" });
-        return;
+        res.json({ message: "success" });
       }
     }
   );
@@ -55,9 +55,11 @@ const loadChats = (req, res) => {
 const loadUsers = (req, res) => {
   let userList = [];
   const request = new Request(
-    "SELECT id, username FROM Users",
+    `WITH temporary AS (SELECT DISTINCT Users.id, Users.username, chats.fromUserId, chats.toUserId FROM chats INNER JOIN Users ON chats.fromUserId = Users.id WHERE Users.id = ${req.params.id})
+    SELECT temporary.toUserId, Users.id, Users.username FROM Users INNER JOIN temporary ON temporary.toUserid = Users.id`,
     (err, rowCount, rows) => {
       if (err) {
+        console.log(rows);
         console.log(err.message);
         res.json(userList);
       } else {

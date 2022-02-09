@@ -43,7 +43,7 @@ router.post("/sendChat", auth, sendChat);
 
 router.get("/loadChats", auth, loadChats);
 
-router.get("/loadUsers", auth, loadUsers);
+router.get("/loadUsers/:id", auth, loadUsers);
 
 //export default router;
 export default router;
