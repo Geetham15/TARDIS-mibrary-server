@@ -25,4 +25,56 @@ const sendChat = (req, res) => {
   connection.execSql(request);
 };
 
-export { sendChat };
+const loadChats = (req, res) => {
+  const fromUserId = req.query.fromUserId;
+  const toUserId = req.query.toUserId;
+  const request = new Request(
+    `SELECT * FROM chats WHERE (fromUserId = ${fromUserId} AND toUserId = ${toUserId}) OR (toUserId = ${fromUserId} AND fromUserId = ${toUserId})`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+        res.json(null);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        let chatList = [];
+        for (let row of rows) {
+          let rowObject = {};
+          for (let col of row) {
+            let columnName = col.metadata.colName;
+            rowObject[columnName] = col.value;
+          }
+          chatList.push(rowObject);
+        }
+        res.json(chatList);
+      }
+    }
+  );
+  connection.execSql(request);
+};
+
+const loadUsers = (req, res) => {
+  let userList = [];
+  const request = new Request(
+    "SELECT id, username FROM Users",
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+        res.json(userList);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        for (let row of rows) {
+          let rowObject = {};
+          for (let col of row) {
+            let columnName = col.metadata.colName;
+            rowObject[columnName] = col.value;
+          }
+          userList.push(rowObject);
+        }
+        res.json(userList);
+      }
+    }
+  );
+  connection.execSql(request);
+};
+
+export { sendChat, loadChats, loadUsers };
