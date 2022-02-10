@@ -79,4 +79,19 @@ const loadUsers = (req, res) => {
   connection.execSql(request);
 };
 
-export { sendChat, loadChats, loadUsers };
+const deleteConversation = (req, res) => {
+  const request = new Request(
+    `DELETE FROM chats WHERE (fromUserId=${req.body.userId} AND toUserId=${req.body.id}) OR (fromUserId=${req.body.id} AND toUserId=${req.body.userId})`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err);
+        res.json(err);
+      } else {
+        res.json({ message: "success" });
+      }
+    }
+  );
+  connection.execSql(request);
+};
+
+export { sendChat, loadChats, loadUsers, deleteConversation };

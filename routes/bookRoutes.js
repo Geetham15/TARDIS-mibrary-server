@@ -15,6 +15,7 @@ import {
   sendChat,
   loadChats,
   loadUsers,
+  deleteConversation,
 } from "../controllers/chatController.js";
 
 const router = express.Router();
@@ -44,6 +45,8 @@ router.post("/sendChat", auth, sendChat);
 router.get("/loadChats", auth, loadChats);
 
 router.get("/loadUsers/:id", auth, loadUsers);
+
+router.post("/deleteConversation", deleteConversation);
 
 //export default router;
 export default router;
