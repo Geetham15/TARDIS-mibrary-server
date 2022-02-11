@@ -256,6 +256,29 @@ function isLoggedIn(req, res) {
   }
 }
 
+function updatePostalCode(req, res) {
+  const { latitude, longitude, userId } = req.body;
+  const request = new Request(
+    `UPDATE Users SET latitude = ${latitude}, longitude = ${longitude} WHERE id = ${userId}`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log("Problem updating latitude or longitude.");
+        res.json({
+          message: "Problem updating latitude or longitude.",
+          success: false,
+        });
+      } else {
+        console.log(`Postal code successfully updated.`);
+        res.json({
+          message: `Postal code successfully updated.`,
+          success: true,
+        });
+      }
+    }
+  );
+  connection.execSql(request);
+}
+
 export {
   addBook,
   listBook,
@@ -266,4 +289,5 @@ export {
   deleteBookById,
   logOut,
   isLoggedIn,
+  updatePostalCode,
 };
