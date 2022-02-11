@@ -10,6 +10,7 @@ import {
   deleteBookById,
   logOut,
   isLoggedIn,
+  updatePostalCode,
 } from "../controllers/controller.js";
 import {
   sendChat,
@@ -47,6 +48,8 @@ router.get("/loadChats", auth, loadChats);
 router.get("/loadUsers/:id", auth, loadUsers);
 
 router.post("/deleteConversation", deleteConversation);
+
+router.post("/updatePostalCode", updatePostalCode);
 
 //export default router;
 export default router;
