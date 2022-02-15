@@ -11,6 +11,7 @@ import {
   logOut,
   isLoggedIn,
   updatePostalCode,
+  bookOutOnLoan,
 } from "../controllers/controller.js";
 import {
   sendChat,
@@ -38,6 +39,8 @@ router.post("/logIn", logIn);
 router.get("/logOut", auth, logOut);
 
 router.get("/loggedIn", isLoggedIn);
+
+router.post("/bookOutOnLoan", auth, bookOutOnLoan)
 
 // chat routes
 

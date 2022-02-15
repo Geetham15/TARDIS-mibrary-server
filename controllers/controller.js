@@ -3,6 +3,42 @@ import { Request, TYPES } from "tedious";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
+function bookOutOnLoan(req, res) {
+  try{
+    const {
+      bookId,
+      dateBorrowed,
+      bookowner_id,
+      bookborrower_id,
+      dateDueForReturn,
+      bookStatus
+    } = req.body;
+    const request = new Request(`INSERT INTO booksOutOnLoan(bookId, dateBorrowed, bookowner_id,  bookborrower_id, dateDueForReturn, bookStatus, dateReturned) VALUES (@bookId, @dateBorrowed, @bookowner_id, @bookborrower_id, @dateDueForReturn, @bookStatus,@dateReturned)`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+      
+      } else {
+        console.log(rowCount + " added");
+        res.json({ message: "Success! Book Borrowed.", success: true });
+      }
+    }
+    );
+    request.addParameter("bookId", TYPES.Int, bookId);
+    request.addParameter("dateBorrowed", TYPES.Date, dateBorrowed);
+    request.addParameter("bookowner_id", TYPES.Int, bookowner_id);
+    request.addParameter("bookborrower_id", TYPES.Int, bookborrower_id);
+    request.addParameter("dateDueForReturn", TYPES.Date, dateDueForReturn);
+    request.addParameter("bookStatus", TYPES.Char, bookStatus);
+    request.addParameter("dateReturned", TYPES.Date, null);
+
+    connection.execSql(request);
+  }catch{
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+}
+
 function listBook(req, res) {
   let bookList;
   const request = new Request(
@@ -118,7 +154,6 @@ function findUserByEmail(email) {
     connection.execSql(request);
   });
 }
-
 function addBook(req, res) {
   console.log(req.body);
   const {
@@ -290,4 +325,5 @@ export {
   logOut,
   isLoggedIn,
   updatePostalCode,
+  bookOutOnLoan,
 };
