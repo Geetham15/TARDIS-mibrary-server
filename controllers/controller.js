@@ -102,7 +102,7 @@ function deleteBookById(req, res) {
 
 function search(req, res) {
   const request = new Request(
-    `SELECT allBooks.*, Users.userName, Users.id, Users.latitude, Users.longitude FROM allBooks INNER JOIN Users ON allBooks.user_id = Users.id WHERE title LIKE '%${req.params.title}%'`,
+    `SELECT allBooks.*, Users.userName, Users.latitude, Users.longitude FROM allBooks INNER JOIN Users ON allBooks.user_id = Users.id WHERE title LIKE '%${req.params.title}%'`,
     (err, rowCount, rows) => {
       if (err) {
         console.log(err.message);
