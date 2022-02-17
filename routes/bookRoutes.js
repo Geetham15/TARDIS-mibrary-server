@@ -12,6 +12,7 @@ import {
   isLoggedIn,
   updatePostalCode,
   bookOutOnLoan,
+  getLentBooks,
 } from "../controllers/controller.js";
 import {
   sendChat,
@@ -40,7 +41,11 @@ router.get("/logOut", auth, logOut);
 
 router.get("/loggedIn", isLoggedIn);
 
-router.post("/bookOutOnLoan", auth, bookOutOnLoan)
+router.post("/bookOutOnLoan", auth, bookOutOnLoan);
+
+router.post("/updatePostalCode", auth, updatePostalCode);
+
+router.get("/getLentBooks/:id", auth, getLentBooks);
 
 // chat routes
 
@@ -51,8 +56,6 @@ router.get("/loadChats", auth, loadChats);
 router.get("/loadUsers/:id", auth, loadUsers);
 
 router.post("/deleteConversation", deleteConversation);
-
-router.post("/updatePostalCode", updatePostalCode);
 
 //export default router;
 export default router;

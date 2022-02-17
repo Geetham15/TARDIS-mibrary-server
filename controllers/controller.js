@@ -4,25 +4,25 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 function bookOutOnLoan(req, res) {
-  try{
+  try {
     const {
       bookId,
       dateBorrowed,
       bookowner_id,
       bookborrower_id,
       dateDueForReturn,
-      bookStatus
+      bookStatus,
     } = req.body;
-    const request = new Request(`INSERT INTO booksOutOnLoan(bookId, dateBorrowed, bookowner_id,  bookborrower_id, dateDueForReturn, bookStatus, dateReturned) VALUES (@bookId, @dateBorrowed, @bookowner_id, @bookborrower_id, @dateDueForReturn, @bookStatus,@dateReturned)`,
-    (err, rowCount, rows) => {
-      if (err) {
-        console.log(err.message);
-      
-      } else {
-        console.log(rowCount + " added");
-        res.json({ message: "Success! Book Borrowed.", success: true });
+    const request = new Request(
+      `INSERT INTO booksOutOnLoan(bookId, dateBorrowed, bookowner_id,  bookborrower_id, dateDueForReturn, bookStatus, dateReturned) VALUES (@bookId, @dateBorrowed, @bookowner_id, @bookborrower_id, @dateDueForReturn, @bookStatus,@dateReturned)`,
+      (err, rowCount, rows) => {
+        if (err) {
+          console.log(err.message);
+        } else {
+          console.log(rowCount + " added");
+          res.json({ message: "Success! Book Borrowed.", success: true });
+        }
       }
-    }
     );
     request.addParameter("bookId", TYPES.Int, bookId);
     request.addParameter("dateBorrowed", TYPES.Date, dateBorrowed);
@@ -33,7 +33,7 @@ function bookOutOnLoan(req, res) {
     request.addParameter("dateReturned", TYPES.Date, null);
 
     connection.execSql(request);
-  }catch{
+  } catch {
     console.error(err);
     res.status(500).json({ message: err.message });
   }
@@ -314,6 +314,33 @@ function updatePostalCode(req, res) {
   connection.execSql(request);
 }
 
+function getLentBooks(req, res) {
+  const request = new Request(
+    `WITH temp AS (SELECT booksOutOnLoan.dateBorrowed, booksOutOnLoan.bookborrower_id, booksOutOnLoan.dateDueForReturn, allBooks.title, allBooks.authors, allBooks.condition FROM booksOutOnLoan INNER JOIN allBooks ON booksOutOnLoan.bookId = allBooks.id WHERE booksOutOnLoan.bookowner_id = ${req.params.id}) 
+    SELECT temp.*, Users.username FROM temp INNER JOIN Users ON temp.bookborrower_id = Users.id`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+        res.json(null);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        let bookList = [];
+        for (let row of rows) {
+          let rowObject = {};
+          for (let col of row) {
+            let columnName = col.metadata.colName;
+            rowObject[columnName] = col.value;
+          }
+          bookList.push(rowObject);
+        }
+        console.log(bookList);
+        res.json(bookList);
+      }
+    }
+  );
+  connection.execSql(request);
+}
+
 export {
   addBook,
   listBook,
@@ -326,4 +353,5 @@ export {
   isLoggedIn,
   updatePostalCode,
   bookOutOnLoan,
+  getLentBooks,
 };
