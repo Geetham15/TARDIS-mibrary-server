@@ -13,6 +13,7 @@ import {
   updatePostalCode,
   bookOutOnLoan,
   getLentBooks,
+  getBooksDueSoon,
 } from "../controllers/controller.js";
 import {
   sendChat,
@@ -46,6 +47,8 @@ router.post("/bookOutOnLoan", auth, bookOutOnLoan);
 router.post("/updatePostalCode", auth, updatePostalCode);
 
 router.get("/getLentBooks/:id", auth, getLentBooks);
+
+router.get("/getBooksDueSoon/:id", auth, getBooksDueSoon)
 
 // chat routes
 
