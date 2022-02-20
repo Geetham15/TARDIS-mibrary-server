@@ -329,7 +329,14 @@ function getLentBooks(req, res) {
           let rowObject = {};
           for (let col of row) {
             let columnName = col.metadata.colName;
-            rowObject[columnName] = col.value;
+            if (
+              columnName === "dateBorrowed" ||
+              columnName === "dateDueForReturn"
+            ) {
+              rowObject[columnName] = `${col.value}`.slice(0, 10);
+            } else {
+              rowObject[columnName] = col.value;
+            }
           }
           bookList.push(rowObject);
         }
@@ -394,7 +401,14 @@ function getBooksRented(req, res) {
           let rowObject = {};
           for (let col of row) {
             let columnName = col.metadata.colName;
-            rowObject[columnName] = col.value;
+            if (
+              columnName === "dateBorrowed" ||
+              columnName === "dateDueForReturn"
+            ) {
+              rowObject[columnName] = `${col.value}`.slice(0, 10);
+            } else {
+              rowObject[columnName] = col.value;
+            }
           }
           bookList.push(rowObject);
         }
