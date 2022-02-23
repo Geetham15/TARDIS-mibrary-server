@@ -17,6 +17,7 @@ import {
   getBooksRented,
   getPendingRentals,
   updatePendingRental,
+  confirmRental,
 } from "../controllers/controller.js";
 import {
   sendChat,
@@ -55,9 +56,11 @@ router.get("/getBooksDueSoon/:id", auth, getBooksDueSoon);
 
 router.get("/getBooksRented/:id", auth, getBooksRented);
 
-router.get("/getPendingRentals", auth, getPendingRentals);
+router.get("/getPendingRentals/:id", auth, getPendingRentals);
 
 router.post("/updatePendingRental", auth, updatePendingRental);
+
+router.post("/confirmRental", auth, confirmRental);
 
 // chat routes
 
