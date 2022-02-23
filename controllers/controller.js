@@ -45,7 +45,7 @@ function bookOutOnLoan(req, res) {
 function listBook(req, res) {
     let bookList;
     const request = new Request(
-        "SELECT * FROM allBooks where isDeleted = false",
+        "SELECT * FROM allBooks where isDeleted = 'false' ",
         (err, rowCount, rows) => {
             if (err) {
                 console.log(err.message);
