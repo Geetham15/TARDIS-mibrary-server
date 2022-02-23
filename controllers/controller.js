@@ -389,7 +389,7 @@ function getBooksRented(req, res) {
       FROM allBooks  
       INNER JOIN 
       booksOutOnLoan on booksOutOnLoan.bookId=allBooks.id 
-      WHERE booksOutOnLoan.bookborrower_id=${req.params.id})
+      WHERE booksOutOnLoan.bookborrower_id=${req.params.id} AND booksOutOnLoan.bookStatus LIKE 'Lend')
         SELECT temp.*, Users.username FROM temp INNER JOIN Users ON temp.bookowner_id=Users.id`,
     (err, rowCount, rows) => {
       if (err) {
@@ -423,11 +423,11 @@ function getBooksRented(req, res) {
 function getPendingRentals(req, res) {
   const request = new Request(
     `WITH temp AS (Select allBooks.title, allBooks.authors, allBooks.id as bookId, allBooks.condition, 
-      booksOutOnLoan.bookowner_id, booksOutOnLoan.book_borrowing_id
+      booksOutOnLoan.bookowner_id, booksOutOnLoan.book_borrowing_id, booksOutOnLoan.dateBorrowed, booksOutOnLoan.dateDueForReturn
       FROM allBooks  
       INNER JOIN 
       booksOutOnLoan on booksOutOnLoan.bookId=allBooks.id 
-      WHERE booksOutOnLoan.bookborrower_id=${req.query.bookBorrowerId} AND booksOutOnLoan.bookowner_id=${req.query.bookOwnerId} AND (booksOutOnLoan.bookStatus LIKE 'pending' OR booksOutOnLoan.bookStatus LIKE 'reserved'))
+      WHERE booksOutOnLoan.bookborrower_id=${req.params.id} OR booksOutOnLoan.bookowner_id=${req.params.id} AND (booksOutOnLoan.bookStatus LIKE 'pending' OR booksOutOnLoan.bookStatus LIKE 'reserved') AND booksOutOnLoan.dateReturned IS NULL)
         SELECT temp.*, Users.username FROM temp INNER JOIN Users ON temp.bookowner_id=Users.id`,
     (err, rowCount, rows) => {
       if (err) {
@@ -439,8 +439,14 @@ function getPendingRentals(req, res) {
           let rowObject = {};
           for (let col of row) {
             let columnName = col.metadata.colName;
-
-            rowObject[columnName] = col.value;
+            if (
+              columnName === "dateBorrowed" ||
+              columnName === "dateDueForReturn"
+            ) {
+              rowObject[columnName] = `${col.value}`.slice(0, 10);
+            } else {
+              rowObject[columnName] = col.value;
+            }
           }
           bookList.push(rowObject);
         }

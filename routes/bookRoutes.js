@@ -55,7 +55,7 @@ router.get("/getBooksDueSoon/:id", auth, getBooksDueSoon);
 
 router.get("/getBooksRented/:id", auth, getBooksRented);
 
-router.get("/getPendingRentals", auth, getPendingRentals);
+router.get("/getPendingRentals/:id", auth, getPendingRentals);
 
 router.post("/updatePendingRental", auth, updatePendingRental);
 
