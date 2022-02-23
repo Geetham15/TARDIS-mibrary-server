@@ -20,7 +20,7 @@ function bookOutOnLoan(req, res) {
           console.log(err.message);
         } else {
           console.log(rowCount + " added");
-          res.json({ message: "Success! Book Borrowed.", success: true });
+          res.json({ message: "Chat initialized.", success: true });
         }
       }
     );
@@ -423,7 +423,7 @@ function getBooksRented(req, res) {
 function getPendingRentals(req, res) {
   const request = new Request(
     `WITH temp AS (Select allBooks.title, allBooks.authors, allBooks.id as bookId, allBooks.condition, 
-      booksOutOnLoan.bookowner_id, booksOutOnLoan.book_borrowing_id, booksOutOnLoan.dateBorrowed, booksOutOnLoan.dateDueForReturn
+      booksOutOnLoan.bookowner_id, booksOutOnLoan.bookborrower_id, booksOutOnLoan.book_borrowing_id, booksOutOnLoan.dateBorrowed, booksOutOnLoan.dateDueForReturn
       FROM allBooks  
       INNER JOIN 
       booksOutOnLoan on booksOutOnLoan.bookId=allBooks.id 
@@ -475,6 +475,23 @@ function updatePendingRental(req, res) {
   connection.execSql(request);
 }
 
+function confirmRental(req, res) {
+  const request = new Request(
+    `UPDATE booksOutOnLoan
+    SET bookStatus = '${req.body.bookStatus}'
+    WHERE book_borrowing_id = ${req.body.bookBorrowingId}`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        res.json({ message: "success" });
+      }
+    }
+  );
+  connection.execSql(request);
+}
+
 export {
   addBook,
   listBook,
@@ -492,4 +509,5 @@ export {
   getBooksRented,
   getPendingRentals,
   updatePendingRental,
+  confirmRental,
 };
