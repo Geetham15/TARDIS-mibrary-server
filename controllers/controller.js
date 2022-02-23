@@ -320,8 +320,8 @@ function updatePostalCode(req, res) {
 }
 
 function getLentBooks(req, res) {
-    const request = new Request(
-        `WITH temp AS (SELECT booksOutOnLoan.dateBorrowed, booksOutOnLoan.bookborrower_id, booksOutOnLoan.dateDueForReturn, allBooks.title, allBooks.authors, allBooks.condition FROM booksOutOnLoan INNER JOIN allBooks ON booksOutOnLoan.bookId = allBooks.id WHERE booksOutOnLoan.bookowner_id = ${req.params.id}) 
+  const request = new Request(
+    `WITH temp AS (SELECT booksOutOnLoan.dateBorrowed, booksOutOnLoan.bookStatus, booksOutOnLoan.bookborrower_id, booksOutOnLoan.dateDueForReturn, allBooks.title, allBooks.authors, allBooks.condition FROM booksOutOnLoan INNER JOIN allBooks ON booksOutOnLoan.bookId = allBooks.id WHERE booksOutOnLoan.bookowner_id = ${req.params.id}) 
     SELECT temp.*, Users.username FROM temp INNER JOIN Users ON temp.bookborrower_id = Users.id`,
         (err, rowCount, rows) => {
             if (err) {
@@ -354,9 +354,9 @@ function getLentBooks(req, res) {
 }
 
 function getBooksDueSoon(req, res) {
-    const request = new Request(
-        `WITH temp AS (Select allBooks.title, allBooks.authors, allBooks.id as bookId, allBooks.condition, 
-      booksOutOnLoan.bookowner_id, booksOutOnLoan.dateBorrowed, booksOutOnLoan.dateDueForReturn, 
+  const request = new Request(
+    `WITH temp AS (Select allBooks.title, allBooks.authors, allBooks.id as bookId, allBooks.condition, 
+      booksOutOnLoan.bookowner_id, booksOutOnLoan.bookStatus, booksOutOnLoan.dateBorrowed, booksOutOnLoan.dateDueForReturn, 
       DATEDIFF(DD, GETDATE(), booksOutOnLoan.dateDueForReturn) as daysLeftToReturn
       FROM allBooks  
       INNER JOIN 
@@ -387,9 +387,9 @@ function getBooksDueSoon(req, res) {
 }
 
 function getBooksRented(req, res) {
-    const request = new Request(
-        `WITH temp AS (Select allBooks.title, allBooks.authors, allBooks.id as bookId, allBooks.condition, 
-      booksOutOnLoan.bookowner_id, booksOutOnLoan.dateBorrowed, booksOutOnLoan.dateDueForReturn, 
+  const request = new Request(
+    `WITH temp AS (Select allBooks.title, allBooks.authors, allBooks.id as bookId, allBooks.condition, 
+      booksOutOnLoan.bookowner_id, booksOutOnLoan.dateBorrowed, booksOutOnLoan.bookStatus, booksOutOnLoan.dateDueForReturn, 
       DATEDIFF(DD, GETDATE(), booksOutOnLoan.dateDueForReturn) as daysLeftToReturn
       FROM allBooks  
       INNER JOIN 
@@ -424,19 +424,71 @@ function getBooksRented(req, res) {
     );
     connection.execSql(request);
 }
+
+function getPendingRentals(req, res) {
+  const request = new Request(
+    `WITH temp AS (Select allBooks.title, allBooks.authors, allBooks.id as bookId, allBooks.condition, 
+      booksOutOnLoan.bookowner_id, booksOutOnLoan.book_borrowing_id
+      FROM allBooks  
+      INNER JOIN 
+      booksOutOnLoan on booksOutOnLoan.bookId=allBooks.id 
+      WHERE booksOutOnLoan.bookborrower_id=${req.query.bookBorrowerId} AND booksOutOnLoan.bookowner_id=${req.query.bookOwnerId} AND (booksOutOnLoan.bookStatus LIKE 'pending' OR booksOutOnLoan.bookStatus LIKE 'reserved'))
+        SELECT temp.*, Users.username FROM temp INNER JOIN Users ON temp.bookowner_id=Users.id`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        let bookList = [];
+        for (let row of rows) {
+          let rowObject = {};
+          for (let col of row) {
+            let columnName = col.metadata.colName;
+
+            rowObject[columnName] = col.value;
+          }
+          bookList.push(rowObject);
+        }
+        console.log(bookList);
+        res.json(bookList);
+      }
+    }
+  );
+  connection.execSql(request);
+}
+
+function updatePendingRental(req, res) {
+  const request = new Request(
+    `UPDATE booksOutOnLoan
+    SET dateBorrowed = '${req.body.dateBorrowed}', dateDueForReturn = '${req.body.dateDueForReturn}', bookStatus = '${req.body.bookStatus}'
+    WHERE book_borrowing_id = ${req.body.bookBorrowingId}`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        res.json({ message: "success" });
+      }
+    }
+  );
+  connection.execSql(request);
+}
+
 export {
-    addBook,
-    listBook,
-    search,
-    createUser,
-    logIn,
-    listBooksByUserId,
-    deleteBookById,
-    logOut,
-    isLoggedIn,
-    updatePostalCode,
-    bookOutOnLoan,
-    getLentBooks,
-    getBooksDueSoon,
-    getBooksRented,
+  addBook,
+  listBook,
+  search,
+  createUser,
+  logIn,
+  listBooksByUserId,
+  deleteBookById,
+  logOut,
+  isLoggedIn,
+  updatePostalCode,
+  bookOutOnLoan,
+  getLentBooks,
+  getBooksDueSoon,
+  getBooksRented,
+  getPendingRentals,
+  updatePendingRental,
 };
