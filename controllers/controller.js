@@ -263,7 +263,7 @@ async function logIn(req, res) {
     res.json({ message: "success" });
   } else {
     console.log("login failed");
-    res.json(null);
+    res.json({ message: "login failed" });
   }
 }
 
@@ -321,7 +321,7 @@ function updatePostalCode(req, res) {
 
 function getLentBooks(req, res) {
   const request = new Request(
-    `WITH temp AS (SELECT booksOutOnLoan.dateBorrowed, booksOutOnLoan.bookStatus, booksOutOnLoan.bookborrower_id, booksOutOnLoan.dateDueForReturn, allBooks.title, allBooks.authors, allBooks.condition FROM booksOutOnLoan INNER JOIN allBooks ON booksOutOnLoan.bookId = allBooks.id WHERE booksOutOnLoan.bookowner_id = ${req.params.id}) 
+    `WITH temp AS (SELECT booksOutOnLoan.dateBorrowed, booksOutOnLoan.book_borrowing_id, booksOutOnLoan.bookStatus, booksOutOnLoan.bookborrower_id, booksOutOnLoan.dateDueForReturn, allBooks.title, allBooks.authors, allBooks.condition FROM booksOutOnLoan INNER JOIN allBooks ON booksOutOnLoan.bookId = allBooks.id WHERE booksOutOnLoan.bookowner_id = ${req.params.id} AND booksOutOnLoan.dateReturned IS NULL AND (booksOutOnLoan.bookStatus LIKE 'Lend' OR booksOutOnLoan.bookStatus LIKE 'return')) 
     SELECT temp.*, Users.username FROM temp INNER JOIN Users ON temp.bookborrower_id = Users.id`,
     (err, rowCount, rows) => {
       if (err) {
@@ -388,13 +388,13 @@ function getBooksDueSoon(req, res) {
 
 function getBooksRented(req, res) {
   const request = new Request(
-    `WITH temp AS (Select allBooks.title, allBooks.authors, allBooks.id as bookId, allBooks.condition, 
+    `WITH temp AS (Select allBooks.title, allBooks.authors, allBooks.id as bookId, allBooks.condition, booksOutOnLoan.book_borrowing_id,
       booksOutOnLoan.bookowner_id, booksOutOnLoan.dateBorrowed, booksOutOnLoan.bookStatus, booksOutOnLoan.dateDueForReturn, 
       DATEDIFF(DD, GETDATE(), booksOutOnLoan.dateDueForReturn) as daysLeftToReturn
       FROM allBooks  
       INNER JOIN 
       booksOutOnLoan on booksOutOnLoan.bookId=allBooks.id 
-      WHERE booksOutOnLoan.bookborrower_id=${req.params.id} AND booksOutOnLoan.bookStatus LIKE 'Lend')
+      WHERE booksOutOnLoan.bookborrower_id=${req.params.id} AND (booksOutOnLoan.bookStatus LIKE 'Lend' OR booksOutOnLoan.bookStatus LIKE 'return'))
         SELECT temp.*, Users.username FROM temp INNER JOIN Users ON temp.bookowner_id=Users.id`,
     (err, rowCount, rows) => {
       if (err) {
@@ -480,10 +480,27 @@ function updatePendingRental(req, res) {
   connection.execSql(request);
 }
 
-function confirmRental(req, res) {
+function updateRental(req, res) {
   const request = new Request(
     `UPDATE booksOutOnLoan
     SET bookStatus = '${req.body.bookStatus}'
+    WHERE book_borrowing_id = ${req.body.bookBorrowingId}`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err.message);
+      } else {
+        console.log(rowCount + " row(s) returned");
+        res.json({ message: "success" });
+      }
+    }
+  );
+  connection.execSql(request);
+}
+
+function confirmReturn(req, res) {
+  const request = new Request(
+    `UPDATE booksOutOnLoan
+    SET bookStatus = 'returned', dateReturned = getdate()
     WHERE book_borrowing_id = ${req.body.bookBorrowingId}`,
     (err, rowCount, rows) => {
       if (err) {
@@ -514,5 +531,6 @@ export {
   getBooksRented,
   getPendingRentals,
   updatePendingRental,
-  confirmRental,
+  updateRental,
+  confirmReturn,
 };
