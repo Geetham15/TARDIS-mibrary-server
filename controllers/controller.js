@@ -14,13 +14,18 @@ function bookOutOnLoan(req, res) {
       bookStatus,
     } = req.body;
     const request = new Request(
-      `INSERT INTO booksOutOnLoan(bookId, dateBorrowed, bookowner_id,  bookborrower_id, dateDueForReturn, bookStatus, dateReturned) VALUES (@bookId, @dateBorrowed, @bookowner_id, @bookborrower_id, @dateDueForReturn, @bookStatus, @dateReturned)`,
-      (err, rowCount, rows) => {
+      `INSERT INTO booksOutOnLoan(bookId, dateBorrowed, bookowner_id,  bookborrower_id, dateDueForReturn, bookStatus, dateReturned) VALUES (@bookId, @dateBorrowed, @bookowner_id, @bookborrower_id, @dateDueForReturn, @bookStatus, @dateReturned)
+      SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]`,
+      (err, rowCount, row) => {
         if (err) {
           console.log(err.message);
         } else {
           console.log(rowCount + " added");
-          res.json({ message: "Chat initialized.", success: true });
+          res.json({
+            message: "Chat initialized.",
+            success: true,
+            id: row,
+          });
         }
       }
     );
@@ -170,9 +175,10 @@ function addBook(req, res) {
   } = req.body;
   const request = new Request(
     `INSERT INTO allBooks (title, authors, isbn_13, isbn_10, physical_format, condition, comments, user_id) OUTPUT Inserted.ID VALUES (@title, @authors, @isbn_13, @isbn_10, @physical_format, @condition, @comments, @user_id)`,
-    (err, rowCount, id) => {
-      if (err) {
-        console.log(err.message);
+    (error, rowCount, id) => {
+      if (error) {
+        console.log(error.message);
+        res.json({ error, message: "nothing found" });
       } else {
         console.log(rowCount + " added");
         console.log(id[0][0].value);
