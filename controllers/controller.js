@@ -106,10 +106,13 @@ function deleteBookById(req, res) {
   );
   connection.execSql(request);
 }
-
+//Return the booklist which is available and the returned book which was already loaned out. 
 function search(req, res) {
   const request = new Request(
-    `SELECT allBooks.*, Users.userName, Users.latitude, Users.longitude FROM allBooks INNER JOIN Users ON allBooks.user_id = Users.id WHERE isDeleted = 'false' and title LIKE '%${req.params.title}%'`,
+    `SELECT * from allBooks INNER JOIN Users ON allBooks.user_id=Users.id
+    WHERE allBooks.id not in (select bookId from booksOutOnLoan where bookStatus not like 'returned' and bookStatus not like 'pending')
+    AND allBooks.title like '%${req.params.title}%'
+    AND allBooks.isDeleted=0`,
     (err, rowCount, rows) => {
       if (err) {
         console.log(err.message);
