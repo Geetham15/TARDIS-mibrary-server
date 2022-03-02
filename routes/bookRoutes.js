@@ -27,6 +27,8 @@ import {
   deleteConversation,
 } from "../controllers/chatController.js";
 
+import { getRating, rateUser } from "../controllers/ratingsController.js";
+
 const router = express.Router();
 
 router.get("/bookList", auth, listBook);
@@ -76,6 +78,12 @@ router.get("/loadChats", auth, loadChats);
 router.get("/loadUsers/:id", auth, loadUsers);
 
 router.post("/deleteConversation", auth, deleteConversation);
+
+// ratings routes
+
+router.get("/getRating/:id", auth, getRating);
+
+router.post("/rateUser", auth, rateUser);
 
 //export default router;
 export default router;
