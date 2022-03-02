@@ -442,7 +442,7 @@ function getPendingRentals(req, res) {
       INNER JOIN 
       booksOutOnLoan on booksOutOnLoan.bookId=allBooks.id 
       WHERE (booksOutOnLoan.bookborrower_id=${req.params.id} OR booksOutOnLoan.bookowner_id=${req.params.id}) AND (booksOutOnLoan.bookStatus LIKE 'pending' OR booksOutOnLoan.bookStatus LIKE 'reserved') AND booksOutOnLoan.dateReturned IS NULL)
-        SELECT temp.*, Users.username FROM temp INNER JOIN Users ON temp.bookowner_id=Users.id`,
+        SELECT temp.*, Users.username, Users2.username as username2 FROM temp INNER JOIN Users ON temp.bookowner_id=Users.id INNER JOIN Users as Users2 ON bookborrower_id = Users2.id;`,
     (err, rowCount, rows) => {
       if (err) {
         console.log(err.message);
