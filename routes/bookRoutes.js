@@ -27,7 +27,7 @@ import {
   deleteConversation,
 } from "../controllers/chatController.js";
 
-import { getRating } from "../controllers/ratingsController.js";
+import { getRating, rateUser } from "../controllers/ratingsController.js";
 
 const router = express.Router();
 
@@ -82,6 +82,8 @@ router.post("/deleteConversation", auth, deleteConversation);
 // ratings routes
 
 router.get("/getRating/:id", auth, getRating);
+
+router.post("/rateUser", auth, rateUser);
 
 //export default router;
 export default router;
