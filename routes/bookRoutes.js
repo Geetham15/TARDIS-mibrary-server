@@ -19,6 +19,7 @@ import {
   updatePendingRental,
   updateRental,
   confirmReturn,
+  deletePending,
 } from "../controllers/controller.js";
 import {
   sendChat,
@@ -68,6 +69,8 @@ router.post("/confirmRental", auth, updateRental);
 router.post("/initiateReturn", auth, updateRental);
 
 router.post("/confirmReturn", auth, confirmReturn);
+
+router.post("/deletePending", auth, deletePending);
 
 // chat routes
 

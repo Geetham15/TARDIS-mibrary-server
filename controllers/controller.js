@@ -106,10 +106,10 @@ function deleteBookById(req, res) {
   );
   connection.execSql(request);
 }
-//Return the booklist which is available and the returned book which was already loaned out. 
+//Return the booklist which is available and the returned book which was already loaned out.
 function search(req, res) {
   const request = new Request(
-    `SELECT * from allBooks INNER JOIN Users ON allBooks.user_id=Users.id
+    `SELECT allBooks.id AS bookId, allBooks.title, allBooks.authors, allBooks.physical_format, allBooks.condition, allBooks.comments, allBooks.user_id, Users.username, Users.latitude, Users.longitude from allBooks INNER JOIN Users ON allBooks.user_id=Users.id
     WHERE allBooks.id not in (select bookId from booksOutOnLoan where bookStatus not like 'returned' and bookStatus not like 'pending')
     AND allBooks.title like '%${req.params.title}%'
     AND allBooks.isDeleted=0`,
@@ -442,7 +442,7 @@ function getPendingRentals(req, res) {
       INNER JOIN 
       booksOutOnLoan on booksOutOnLoan.bookId=allBooks.id 
       WHERE (booksOutOnLoan.bookborrower_id=${req.params.id} OR booksOutOnLoan.bookowner_id=${req.params.id}) AND (booksOutOnLoan.bookStatus LIKE 'pending' OR booksOutOnLoan.bookStatus LIKE 'reserved') AND booksOutOnLoan.dateReturned IS NULL)
-        SELECT temp.*, Users.username, Users2.username as username2 FROM temp INNER JOIN Users ON temp.bookowner_id=Users.id INNER JOIN Users as Users2 ON bookborrower_id = Users2.id;`,
+        SELECT temp.*, Users.username, Users2.username as username2 FROM temp INNER JOIN Users ON temp.bookowner_id=Users.id INNER JOIN Users as Users2 ON bookborrower_id = Users2.id`,
     (err, rowCount, rows) => {
       if (err) {
         console.log(err.message);
@@ -523,6 +523,21 @@ function confirmReturn(req, res) {
   connection.execSql(request);
 }
 
+const deletePending = (req, res) => {
+  const request = new Request(
+    `DELETE FROM booksOutOnLoan WHERE ((bookowner_id=${req.body.userId} AND bookborrower_id=${req.body.id}) OR (bookowner_id=${req.body.id} AND bookborrower_id=${req.body.userId})) AND bookStatus LIKE 'pending'`,
+    (err, rowCount, rows) => {
+      if (err) {
+        console.log(err);
+        res.json(err);
+      } else {
+        res.json({ message: "success" });
+      }
+    }
+  );
+  connection.execSql(request);
+};
+
 export {
   addBook,
   listBook,
@@ -542,4 +557,5 @@ export {
   updatePendingRental,
   updateRental,
   confirmReturn,
+  deletePending,
 };
