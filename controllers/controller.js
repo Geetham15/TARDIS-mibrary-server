@@ -513,10 +513,10 @@ function confirmReturn(req, res) {
     WHERE book_borrowing_id = ${req.body.bookBorrowingId}`,
     (err, rowCount, rows) => {
       if (err) {
-        console.log(err.message);
+        console.log({ message: "Error", success: false });
       } else {
         console.log(rowCount + " row(s) returned");
-        res.json({ message: "success" });
+        res.json({ message: "success", success: true });
       }
     }
   );
