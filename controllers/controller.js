@@ -497,9 +497,10 @@ function updateRental(req, res) {
     (err, rowCount, rows) => {
       if (err) {
         console.log(err.message);
+        res.json({ message: "failed", success: false });
       } else {
         console.log(rowCount + " row(s) returned");
-        res.json({ message: "success" });
+        res.json({ message: "success", success: true });
       }
     }
   );
