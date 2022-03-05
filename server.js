@@ -5,7 +5,6 @@ import router from "./routes/bookRoutes.js";
 import cookieParser from "cookie-parser";
 
 dotenv.config();
-console.log(process.env.AZURE_USERNAME);
 const app = express();
 const port = process.env.PORT || 5050;
 
