@@ -457,7 +457,11 @@ function getPendingRentals(req, res) {
               columnName === "dateBorrowed" ||
               columnName === "dateDueForReturn"
             ) {
-              rowObject[columnName] = `${col.value}`.slice(0, 10);
+              if (col.value) {
+                rowObject[columnName] = `${col.value}`.slice(0, 10);
+              } else {
+                rowObject[columnName] = col.value;
+              }
             } else {
               rowObject[columnName] = col.value;
             }
